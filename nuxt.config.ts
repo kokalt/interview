@@ -1,22 +1,50 @@
+import { readFileSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-01',
   devtools: { enabled: true },
 
-  // Auto-import components without path prefix
   components: {
     dirs: [
       { path: '~/components', pathPrefix: false },
     ],
   },
 
-  // Build: SSR + optional static prerender
-  // Note: nuxi dev works perfectly; nuxi generate (SSG) may fail on Windows
-  // paths with CJK characters due to a Nitro prerender bug.
-  // Deploy to Vercel/Netlify which run on Linux to avoid this issue.
   ssr: true,
+  nitro: {
+    preset: 'node-server',
+  },
 
-  // Nuxt modules
+  // Workaround: Nitro generates broken import.meta.url in prerender chunks
+  // on Windows paths with CJK characters (e.g. "桌面").
+  // We hook into the prerender Nitro instance's "compiled" event to patch the
+  // generated file BEFORE it is loaded by import().
+  hooks: {
+    'nitro:init': (nitro: any) => {
+      nitro.hooks.hook('prerender:init', (nitroRenderer: any) => {
+        nitroRenderer.hooks.hook('compiled', () => {
+          const prerenderNitro = resolve(
+            nitroRenderer.options.buildDir,
+            'prerender/chunks/_/nitro.mjs',
+          )
+          try {
+            let content = readFileSync(prerenderNitro, 'utf-8')
+            content = content.replace(
+              'globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env}',
+              'globalThis._importMeta_=globalThis._importMeta_||{url:import.meta.url,env:process.env}',
+            )
+            writeFileSync(prerenderNitro, content, 'utf-8')
+            console.log('  ✓ Patched prerender nitro.mjs (CJK path workaround)')
+          } catch {
+            // File may not exist — that's OK
+          }
+        })
+      })
+    },
+  },
+
   modules: [
     '@nuxt/content',
     '@nuxtjs/tailwindcss',
@@ -24,7 +52,6 @@ export default defineNuxtConfig({
     '@nuxt/icon',
   ],
 
-  // Content module config (v2)
   content: {
     highlight: {
       theme: {
@@ -35,21 +62,18 @@ export default defineNuxtConfig({
     },
   },
 
-  // Color mode config
   colorMode: {
     classSuffix: '',
     preference: 'system',
     fallback: 'light',
   },
 
-  // Icon config
   icon: {
     serverBundle: {
       collections: ['material-symbols', 'logos'],
     },
   },
 
-  // App config
   app: {
     head: {
       title: '前端面试个人博客',
