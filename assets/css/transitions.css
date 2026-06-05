@@ -1,0 +1,92 @@
+/* Page transitions */
+.page-enter-active {
+  animation: pageIn 0.3s ease-out;
+}
+.page-leave-active {
+  animation: pageOut 0.2s ease-in;
+}
+
+@keyframes pageIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Staggered card entrance */
+.stagger-enter-active {
+  animation: cardIn 0.4s ease-out both;
+}
+
+@keyframes cardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal overlay */
+.modal-enter-active {
+  animation: modalOverlayIn 0.2s ease-out;
+}
+.modal-leave-active {
+  animation: modalOverlayOut 0.15s ease-in;
+}
+
+@keyframes modalOverlayIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes modalOverlayOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.modal-content-enter-active {
+  animation: modalContentIn 0.25s ease-out;
+}
+.modal-content-leave-active {
+  animation: modalContentOut 0.15s ease-in;
+}
+
+@keyframes modalContentIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalContentOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+}
